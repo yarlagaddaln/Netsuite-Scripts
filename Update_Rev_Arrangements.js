@@ -43,6 +43,30 @@ function update_revenue_elements_arrangements(type) {
 				revenue_arrangement_load.setLineItemValue('revenueelement', 'revrecstartdate', j, nlapiGetFieldValue('trandate'));
 				revenue_arrangement_load.setLineItemValue('revenueelement', 'forecaststartdate', j, nlapiGetFieldValue('trandate'));
 				//revenue_arrangement_load.commitLineItem('revenueelement');
+				
+				//update revenue plan based on revenue element
+				
+				var revenueplanSearch = nlapiSearchRecord("revenueplan",null,
+				[
+				   ["revenueplantype","anyof","ACTUAL","FORECAST"], 
+				   "AND", 
+				   ["revenueelement.internalid","anyof",revenue_arrangement_load.getLineItemValue('revenueelement','revenueelement',j)]
+				], 
+				[
+				   new nlobjSearchColumn("recordnumber",null,null).setSort(false)
+				]
+				);
+				
+				//submit the revenue plans
+				if ((revenueplanSearch)&&(revenueplanSearch.length >= 1)) {
+					//loop through the revenue elements and reset the dates as per the fulfilment date
+				for (var k in revenueplanSearch) {
+					
+					//update the revenue plan start date with fulfilment start date
+					nlapiSubmitField('revenueplan',revenueplanSearch[k].id,'revrecstartdate',nlapiGetFieldValue('trandate'));
+				}
+					
+				}
 
 			}
 
